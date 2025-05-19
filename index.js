@@ -1,3 +1,4 @@
+const http = require('http');
 const mineflayer = require('mineflayer');
 
 let bot;
@@ -7,29 +8,33 @@ function createBot() {
     host: 'mineblock.sdlf.fun',
     port: 25565,
     username: 'pagal',
-    // auth: 'microsoft' // Uncomment if needed
   });
 
   bot.on('spawn', () => {
-    console.log('Bot spawned in the game.');
+    console.log('Bot has joined the server.');
 
-    // Anti-AFK: jump every 4 minutes
+    // Anti-AFK (jump every 4 minutes)
     setInterval(() => {
-      if (bot.entity) {
-        bot.setControlState('jump', true);
-        setTimeout(() => bot.setControlState('jump', false), 100);
-      }
+      bot.setControlState('jump', true);
+      setTimeout(() => bot.setControlState('jump', false), 100);
     }, 4 * 60 * 1000);
   });
 
   bot.on('end', () => {
-    console.log('Bot disconnected. Reconnecting in 5 seconds...');
+    console.log('Disconnected. Reconnecting in 5 seconds...');
     setTimeout(createBot, 5000);
   });
 
   bot.on('error', (err) => {
-    console.log('Error:', err);
+    console.log('Bot error:', err);
   });
 }
 
 createBot();
+
+// ✅ Add this HTTP server at the end of index.js
+// It keeps Render Web Service alive
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Mineflayer bot is running!\n');
+}).listen(process.env.PORT || 3000);
